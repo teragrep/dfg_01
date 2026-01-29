@@ -29,7 +29,7 @@ runs:
     - name: Add component to main repository
       run: |
         mkdir --parents "${{ runner.temp }}/rpm" "${{ runner.temp }}/component-repo" "${{ runner.temp }}/merged-repo";
-        gh release download --repo "${{ inputs.from_repository }}" --pattern "*.rpm" --dir "${{ runner.temp }}/rpm/" "${{ inputs.from_version }}";
+        gh release download --repo "${{ inputs.from_repository }}" --pattern "*.rpm" --dir "${{ runner.temp }}/rpm/${{ inputs.from_version }}" "${{ inputs.from_version }}";
         sudo apt-get update && sudo apt-get --yes install createrepo-c;
         createrepo_c --no-database --baseurl=https://www.github.com --location-prefix="https://github.com/${{ inputs.from_repository }}/releases/download/" --outputdir="${{ runner.temp }}/component-repo" "${{ runner.temp }}/rpm";
         git config --global user.email "${{ github.actor }}@users.noreply.github.com";
