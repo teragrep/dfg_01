@@ -1,12 +1,10 @@
 = DFG_01 DNF-Repo For GitHub
 
-A simple to use GitHub Action that updates a dnf-compatible repository from `.rpm` files sourced from provided GitHub release.
+A simple to use GitHub Action that updates a dnf-compatible repository from any `.rpm` files present in the working directory at the time of calling.
 
 == Features
 
-- The repository data points directly to `.rpm` files so no re-hosting of binaries is necessary.
-
-- Supports any release from any GitHub repository as long as it has `.rpm` files present.
+- Any `.rpm` files present in the working directory are automatically found and used.
 
 - Supports configurable max retries to avoid merge issues and infinite loops.
 
@@ -16,11 +14,11 @@ A simple to use GitHub Action that updates a dnf-compatible repository from `.rp
 
 You need to have a https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens[Personal Access Token] that has `write` permission to `to_repository` and pass that as the `token` argument.
 
-The actor calling the action needs to have `read` access to the `from_repository`. The default https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#github-context[`github.token`] is used for downloading the releases.
-
 == Limitations
 
-- Supports only GitHub repositories.
+- Assumes that all found `.rpm` files will be found from the target repository under target release.
+
+- Supports deploying only to GitHub repositories.
 
 - The repository file's checksum will not be included in the metadata filename.
 
