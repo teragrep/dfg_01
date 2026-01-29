@@ -31,10 +31,12 @@ runs:
   steps:
     - name: Add component to main repository
       run: |
-        mkdir --parents "${{ runner.temp }}/rpm/${{ inputs.from_version }}" "${{ runner.temp }}/component-repo" "${{ runner.temp }}/merged-repo";
-        cp --verbose ${{ inputs.files }} "${{ runner.temp }}/rpm/${{ inputs.from_version }}/";
-        sudo apt-get update && sudo apt-get --yes install createrepo-c;
-        createrepo_c --no-database --baseurl=https://www.github.com --location-prefix="https://github.com/${{ inputs.from_repository }}/releases/download/" --outputdir="${{ runner.temp }}/component-repo" "${{ runner.temp }}/rpm";
+        export DFG_01_TMPDIR="$(mktmp --directory)";
+        mkdir --parents "${DFG_01_TMPDIR}/rpm/${{ inputs.from_version }}" "${DFG_01_TMPDIR}/component-repo" "${DFG_01_TMPDIR}/merged-repo";
+        cp --verbose ${{ inputs.files }} "${DFG_01_TMPDIR}/rpm/${{ inputs.from_version }}/";
+        sudo apt-get update;
+        sudo apt-get --yes install createrepo-c;
+        createrepo_c --no-database --baseurl=https://www.github.com --location-prefix="https://github.com/${{ inputs.from_repository }}/releases/download/" --outputdir="${DFG_01_TMPDIR}/component-repo" "${DFG_01_TMPDIR}/rpm";
         git config --global user.email "${{ github.actor }}@users.noreply.github.com";
         git config --global user.name "${{ github.actor }}";
         export attempt=0;
@@ -45,9 +47,9 @@ runs:
           bash -c '
             set -e;
             git clone --branch "${{ inputs.to_branch }}" -- "https://oauth2:${{ inputs.token }}@github.com/${{ inputs.to_repository }}.git" upstream;
-            mergerepo_c --simple-md-filenames --all --no-database --repo="upstream/${{ inputs.to_path }}/releases" --repo="${{ runner.temp }}/component-repo" --outputdir "${{ runner.temp }}/merged-repo";
+            mergerepo_c --simple-md-filenames --all --no-database --repo="upstream/${{ inputs.to_path }}/releases" --repo="${DFG_01_TMPDIR}/component-repo" --outputdir "${DFG_01_TMPDIR}/merged-repo";
             rm -rf "upstream/${{ inputs.to_path }}/releases/repodata/";
-            mv --force "${{ runner.temp }}/merged-repo/repodata/" "upstream/${{ inputs.to_path }}/releases/repodata/";
+            mv --force "${DFG_01_TMPDIR}/merged-repo/repodata/" "upstream/${{ inputs.to_path }}/releases/repodata/";
             echo -e "[teragrep-central-releases]\nname=teragrep-central-releases\nbaseurl=https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}/releases\ngpgcheck=0\nenabled=1" > "upstream/${{ inputs.to_path }}/releases/teragrep-central-releases.repo";
             cd "upstream/${{ inputs.to_path }}";
             git add .;
@@ -60,5 +62,5 @@ runs:
           fi;
           sleep 5;
         done;
-        echo "Seems like everything is ok!";
+        echo "Deployed successfully to repository ${{ inputs.to_repository }}!";
       shell: bash
