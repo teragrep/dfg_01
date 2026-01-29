@@ -22,6 +22,8 @@ The actor calling the action needs to have `read` access to the `from_repository
 
 - Supports only GitHub repositories.
 
+- The repository file's checksum will not be included in the metadata filename.
+
 == Usage
 
 Add a `uses: teragrep/dfg_01@main` https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idstepsuses[step] to your workflow.

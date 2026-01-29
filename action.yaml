@@ -42,7 +42,7 @@ runs:
           bash -c '
             set -e;
             git clone --branch "${{ inputs.to_branch }}" -- "https://oauth2:${{ inputs.token }}@github.com/${{ inputs.to_repository }}.git" upstream;
-            mergerepo_c --all --no-database --repo="upstream/${{ inputs.to_path }}/releases" --repo="${{ runner.temp }}/component-repo" --outputdir "${{ runner.temp }}/merged-repo";
+            mergerepo_c --simple-md-filenames --all --no-database --repo="upstream/${{ inputs.to_path }}/releases" --repo="${{ runner.temp }}/component-repo" --outputdir "${{ runner.temp }}/merged-repo";
             rm -rf "upstream/${{ inputs.to_path }}/releases/repodata/";
             mv --force "${{ runner.temp }}/merged-repo/repodata/" "upstream/${{ inputs.to_path }}/releases/repodata/";
             echo -e "[teragrep-central-releases]\nname=teragrep-central-releases\nbaseurl=https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}/releases\ngpgcheck=0\nenabled=1" > "upstream/${{ inputs.to_path }}/releases/teragrep-central-releases.repo";
