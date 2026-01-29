@@ -14,7 +14,9 @@ A simple to use GitHub Action that updates a dnf-compatible repository from `.rp
 
 == Requirements
 
-You need to have a https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens[Personal Access Token] that has `read` permission to the `from_repository` and `write` permission to `to_repository`.
+You need to have a https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens[Personal Access Token] that has `write` permission to `to_repository` and pass that as the `token` argument.
+
+The actor calling the action needs to have `read` access to the `from_repository`. The default https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#github-context[`github.token`] is used for downloading the releases.
 
 == Limitations
 
@@ -73,8 +75,8 @@ These are required arguments to be used in `with:` block.
 |`teragrep/dnf-repo`
 
 |`token`
-|The Personal Access Token to be used with downloading and committing.
-|`github_path_SOMEEXAMPLEKEY`
+|The Personal Access Token to be used with pushing to the target repository.
+|`github_pat_SOMEEXAMPLEKEY`
 |===
 
 These are optional arguments to be used in `with:` block.

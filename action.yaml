@@ -60,4 +60,4 @@ runs:
         echo "Seems like everything is ok!";
       shell: bash
       env:
-        GH_TOKEN: ${{ inputs.token }}
+        GH_TOKEN: ${{ github.token }}
