@@ -8,6 +8,9 @@ inputs:
   from_version:
     required: true
     type: string
+  files:
+    required: true
+    type: string
   to_repository:
     required: true
     type: string
@@ -29,7 +32,7 @@ runs:
     - name: Add component to main repository
       run: |
         mkdir --parents "${{ runner.temp }}/rpm/${{ inputs.from_version }}" "${{ runner.temp }}/component-repo" "${{ runner.temp }}/merged-repo";
-        find . -type f -name "*.rpm" -exec cp --verbose {} "${{ runner.temp }}/rpm/${{ inputs.from_version }}/" \;;
+        mv --verbose ${{ inputs.files }} "${{ runner.temp }}/rpm/${{ inputs.from_version }}/";
         sudo apt-get update && sudo apt-get --yes install createrepo-c;
         createrepo_c --no-database --baseurl=https://www.github.com --location-prefix="https://github.com/${{ inputs.from_repository }}/releases/download/" --outputdir="${{ runner.temp }}/component-repo" "${{ runner.temp }}/rpm";
         git config --global user.email "${{ github.actor }}@users.noreply.github.com";
