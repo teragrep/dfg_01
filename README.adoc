@@ -1,47 +1,95 @@
-// Before publishing your new repository:
-// 1. Write the readme file
-// 2. Update the issues link in Contributing section in the readme file
-// 3. Update the discussion link in config.yml file in .github/ISSUE_TEMPLATE directory
+= DFG_01 DNF-Repo For GitHub
 
-= repo-template
-
-// Add a short description of your project. Tell what your project does and what it's used for.
-
-This is a template repository for Teragrep organization.
+A simple to use GitHub Action that updates a dnf-compatible repository from `.rpm` files sourced from provided GitHub release.
 
 == Features
 
-// List your project's features
+- The repository data points directly to `.rpm` files so no re-hosting of binaries is necessary.
 
-== Documentation
+- Supports any release from any GitHub repository as long as it has `.rpm` files present.
 
-See the official documentation on https://docs.teragrep.com[docs.teragrep.com].
+- Supports configurable max retries to avoid merge issues and infinite loops.
+
+- Creates a ready to use `.repo` file.
+
+== Requirements
+
+You need to have a https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens[Personal Access Token] that has `read` permission to the `from_repository` and `write` permission to `to_repository`.
 
 == Limitations
 
-// If your project has limitations, please list them. Otherwise remove this section.
+- Supports only GitHub repositories.
 
-== How to [compile/use/implement]
+== Usage
 
-// add instructions how people can start to use your project
+Add a `uses: teragrep/dfg_01@main` https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idstepsuses[step] to your workflow.
 
-== Contributing
+Examples uses a secret called `PAT_TOKEN` that contains the token. **DO NOT** hardcode the token at any point.
 
-// Change the repository name in the issues link to match with your project's name
+.Minimum configuration with only required arguments
+[source,yaml]
+----
+- name: Update from release
+  uses: teragrep/dfg_01@main
+  with:
+    from_repository: teragrep/example-repository
+    from_version: 1.0.0
+    to_repository: teragrep/central-repository
+    token: ${{ secrets.PAT_TOKEN }}
+----
 
-You can involve yourself with our project by https://github.com/teragrep/repo-template/issues/new/choose[opening an issue] or submitting a pull request.
+.Full configuration with optional arguments
+[source,yaml]
+----
+- name: Update from release
+  uses: teragrep/dfg_01@main
+  with:
+    from_repository: teragrep/example-repository
+    from_version: 1.0.0
+    to_repository: teragrep/central-repository
+    token: ${{ secrets.PAT_TOKEN }}
+    to_branch: arbitrary-git-branch
+    to_path: arbitrary-base-path
+    max_attempts: 1
+----
 
-Contribution requirements:
+== Documentation
 
-. *All changes must be accompanied by a new or changed test.* If you think testing is not required in your pull request, include a sufficient explanation as why you think so.
-. Security checks must pass
-. Pull requests must align with the principles and http://www.extremeprogramming.org/values.html[values] of extreme programming.
-. Pull requests must follow the principles of Object Thinking and Elegant Objects (EO).
+These are required arguments to be used in `with:` block.
 
-Read more in our https://github.com/teragrep/teragrep/blob/main/contributing.adoc[Contributing Guideline].
+|===
+|Required input argument|Description|Example value
 
-=== Contributor License Agreement
+|`from_repository`
+|The source GitHub repository for the release. In `user/repository` format.
+|`teragrep/release-repo`
 
-Contributors must sign https://github.com/teragrep/teragrep/blob/main/cla.adoc[Teragrep Contributor License Agreement] before a pull request is accepted to organization's repositories.
+|`from_version`
+|The *exact* release version.
+|`1.0.0`
 
-You need to submit the CLA only once. After submitting the CLA you can contribute to all Teragrep's repositories.
+|`to_repository`
+|The target GitHub repository where the repodata is deployed to. In `user/repository` format.
+|`teragrep/dnf-repo`
+
+|`token`
+|The Personal Access Token to be used with downloading and committing.
+|`github_path_SOMEEXAMPLEKEY`
+|===
+
+These are optional arguments to be used in `with:` block.
+|===
+|Optional input argument|Description|Default value
+
+|`to_branch`
+|The branch where repository files are commited to.
+|`gh-pages`
+
+|`to_path`
+|The path where repository files are commited to. No trailing slash required.
+|`central`
+
+|`max_attempts`
+|How times should committing should be attempted.
+|`5`
+|===

@@ -1,0 +1,63 @@
+name: DNF-Repo For GitHub
+description: 'Update a dnf-compatible repository from GitHub release'
+inputs:
+  # Descriptions for these input variables can be found in `README.adoc`
+  from_repository:
+    required: true
+    type: string
+  from_version:
+    required: true
+    type: string
+  to_repository:
+    required: true
+    type: string
+  to_branch:
+    default: 'gh-pages'
+    type: string
+  to_path:
+    default: 'central'
+    type: string
+  max_attempts:
+    default: 5
+    type: string
+  token:
+    required: true
+    type: string
+runs:
+  using: composite
+  steps:
+    - name: Add component to main repository
+      run: |
+        mkdir --parents "${{ runner.temp }}/rpm" "${{ runner.temp }}/component-repo" "${{ runner.temp }}/merged-repo";
+        gh release download --repo "${{ inputs.from_repository }}" --pattern "*.rpm" --dir "${{ runner.temp }}/rpm/" "${{ inputs.from_version }}";
+        sudo apt-get update && sudo apt-get --yes install createrepo-c;
+        createrepo_c --no-database --baseurl=https://www.github.com --location-prefix="https://github.com/${{ inputs.from_repository }}/releases/download/" --outputdir="${{ runner.temp }}/component-repo" "${{ runner.temp }}/rpm";
+        git config --global user.email "${{ github.actor }}@users.noreply.github.com";
+        git config --global user.name "${{ github.actor }}";
+        export attempt=0;
+        while true; do
+          export attempt="$((attempt+1))";
+          echo "Attempt ${attempt}/${{ inputs.max_attempts }}";
+          [ -d upstream/ ] && rm -rf upstream;
+          bash -c '
+            set -e;
+            git clone --branch "${{ inputs.to_branch }}" -- "https://oauth2:${{ inputs.token }}@github.com/${{ inputs.to_repository }}.git" upstream;
+            mergerepo_c --all --no-database --repo="upstream/${{ inputs.to_path }}/releases" --repo="${{ runner.temp }}/component-repo" --outputdir "${{ runner.temp }}/merged-repo";
+            rm -rf "upstream/${{ inputs.to_path }}/releases/repodata/";
+            mv --force "${{ runner.temp }}/merged-repo/repodata/" "upstream/${{ inputs.to_path }}/releases/repodata/";
+            echo -e "[teragrep-central-releases]\nname=teragrep-central-releases\nbaseurl=https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}/releases\ngpgcheck=0\nenabled=1" > "upstream/${{ inputs.to_path }}/releases/teragrep-central-releases.repo";
+            cd "upstream/${{ inputs.to_path }}";
+            git add .;
+            git commit --message "Adds ${{ inputs.from_repository }} version ${{ inputs.from_version }}";
+            git push;
+          ' && break;
+          if [[ "${attempt}" -ge "${{ inputs.max_attempts }}" ]]; then
+            echo "Max attempts encountered, failing";
+            exit 1;
+          fi;
+          sleep 5;
+        done;
+        echo "Seems like everything is ok!";
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
