@@ -10,7 +10,7 @@ A simple to use GitHub Action that updates a dnf-compatible repository from any 
 
 == Requirements
 
-You need to have a https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys[keploy key] configured to the `to_repository` that has `write` permission and pass the private key with `deploy_key`.
+You need to have a https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys[deploy key] configured to the `to_repository` that has `write` permission and pass the private key with `deploy_key`.
 
 == Limitations
 
