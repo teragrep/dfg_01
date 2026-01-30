@@ -44,7 +44,7 @@ runs:
           export attempt="$((attempt+1))";
           echo "Attempt ${attempt}/${{ inputs.max_attempts }}";
           [ -d upstream/ ] && rm --recursive --force upstream;
-          rm --recursive --force "${DFG_01_TMPDIR}/merged-repo/*"
+          rm --recursive --force "${DFG_01_TMPDIR}/merged-repo/*";
           bash -c '
             set -e;
             git clone --branch "${{ inputs.to_branch }}" -- "https://oauth2:${{ inputs.token }}@github.com/${{ inputs.to_repository }}.git" upstream;
