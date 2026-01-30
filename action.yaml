@@ -63,5 +63,6 @@ runs:
           fi;
           sleep 5;
         done;
+        rm --recursive --force "${DFG_01_TMPDIR}/";
         echo "Deployed successfully to repository ${{ inputs.to_repository }}!";
       shell: bash
