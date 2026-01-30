@@ -33,7 +33,7 @@ runs:
       run: |
         export DFG_01_TMPDIR="$(mktemp --directory --tmpdir=${{ runner.temp }})";
         mkdir --parents "${DFG_01_TMPDIR}/rpm/${{ inputs.from_version }}" "${DFG_01_TMPDIR}/component-repo" "${DFG_01_TMPDIR}/merged-repo";
-        for file in ${{ inputs.files }}; do ln --verbose "${file}" "${DFG_01_TMPDIR}/rpm/${{ inputs.from_version }}/$(basename ${file})"; done;
+        for file in ${{ inputs.files }}; do ln --verbose "${{ github.workspace }}/${file}" "${DFG_01_TMPDIR}/rpm/${{ inputs.from_version }}/$(basename ${file})"; done;
         sudo apt-get update;
         sudo apt-get --yes install createrepo-c;
         createrepo_c --no-database --baseurl=https://www.github.com --location-prefix="https://github.com/${{ inputs.from_repository }}/releases/download/" --outputdir="${DFG_01_TMPDIR}/component-repo" "${DFG_01_TMPDIR}/rpm";
