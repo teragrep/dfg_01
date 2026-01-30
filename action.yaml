@@ -36,7 +36,7 @@ runs:
         for file in ${{ inputs.files }}; do ln --verbose "${{ github.workspace }}/${file}" "${DFG_01_TMPDIR}/rpm/${{ inputs.from_version }}/$(basename ${file})"; done;
         sudo apt-get update;
         sudo apt-get --yes install createrepo-c;
-        createrepo_c --no-database --baseurl=https://www.github.com --location-prefix="https://github.com/${{ inputs.from_repository }}/releases/download/" --outputdir="${DFG_01_TMPDIR}/component-repo" "${DFG_01_TMPDIR}/rpm";
+        createrepo_c --verbose --no-database --baseurl=https://www.github.com --location-prefix="https://github.com/${{ inputs.from_repository }}/releases/download/" --outputdir="${DFG_01_TMPDIR}/component-repo" "${DFG_01_TMPDIR}/rpm";
         git config --global user.email "${{ github.actor }}@users.noreply.github.com";
         git config --global user.name "${{ github.actor }}";
         export attempt=0;
@@ -48,7 +48,7 @@ runs:
           bash -c '
             set -e;
             git clone --branch "${{ inputs.to_branch }}" -- "https://oauth2:${{ inputs.token }}@github.com/${{ inputs.to_repository }}.git" upstream;
-            mergerepo_c --simple-md-filenames --all --no-database --repo="upstream/${{ inputs.to_path }}/releases" --repo="${DFG_01_TMPDIR}/component-repo" --outputdir "${DFG_01_TMPDIR}/merged-repo";
+            mergerepo_c --verbose --simple-md-filenames --all --no-database --repo="upstream/${{ inputs.to_path }}/releases" --repo="${DFG_01_TMPDIR}/component-repo" --outputdir "${DFG_01_TMPDIR}/merged-repo";
             rm --recursive --force "upstream/${{ inputs.to_path }}/releases/repodata/";
             mv "${DFG_01_TMPDIR}/merged-repo/repodata/" "upstream/${{ inputs.to_path }}/releases/repodata/";
             echo -e "[teragrep-central-releases]\nname=teragrep-central-releases\nbaseurl=https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}/releases\ngpgcheck=0\nenabled=1" > "upstream/${{ inputs.to_path }}/releases/teragrep-central-releases.repo";
