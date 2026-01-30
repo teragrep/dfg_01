@@ -49,7 +49,7 @@ runs:
           rm --recursive --force "${DFG_01_TMPDIR}/merged-repo/*";
           bash -c '
             set -e;
-            git clone --branch "${{ inputs.to_branch }}" -- "git@github.com/${{ inputs.to_repository }}.git" upstream;
+            git clone --branch "${{ inputs.to_branch }}" -- "git@github.com:${{ inputs.to_repository }}.git" upstream;
             mergerepo_c --verbose --simple-md-filenames --all --no-database --repo="upstream/${{ inputs.to_path }}/releases" --repo="${DFG_01_TMPDIR}/component-repo" --outputdir "${DFG_01_TMPDIR}/merged-repo";
             rm --recursive --force "upstream/${{ inputs.to_path }}/releases/repodata/";
             mv --verbose "${DFG_01_TMPDIR}/merged-repo/repodata/" "upstream/${{ inputs.to_path }}/releases/repodata";
