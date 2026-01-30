@@ -50,7 +50,7 @@ runs:
             git clone --branch "${{ inputs.to_branch }}" -- "https://oauth2:${{ inputs.token }}@github.com/${{ inputs.to_repository }}.git" upstream;
             mergerepo_c --verbose --simple-md-filenames --all --no-database --repo="upstream/${{ inputs.to_path }}/releases" --repo="${DFG_01_TMPDIR}/component-repo" --outputdir "${DFG_01_TMPDIR}/merged-repo";
             rm --recursive --force "upstream/${{ inputs.to_path }}/releases/repodata/";
-            mv "${DFG_01_TMPDIR}/merged-repo/repodata/" "upstream/${{ inputs.to_path }}/releases/repodata/";
+            mv --verbose "${DFG_01_TMPDIR}/merged-repo/repodata/" "upstream/${{ inputs.to_path }}/releases/repodata";
             echo -e "[teragrep-central-releases]\nname=teragrep-central-releases\nbaseurl=https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}/releases\ngpgcheck=0\nenabled=1" > "upstream/${{ inputs.to_path }}/releases/teragrep-central-releases.repo";
             cd "upstream/${{ inputs.to_path }}";
             git add .;
