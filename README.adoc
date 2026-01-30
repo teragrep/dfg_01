@@ -10,7 +10,7 @@ A simple to use GitHub Action that updates a dnf-compatible repository from any 
 
 == Requirements
 
-You need to have a https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens[Personal Access Token] that has `write` permission to `to_repository` and pass that as the `token` argument.
+You need to have a https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys[keploy key] configured to the `to_repository` that has `write` permission and pass the private key with `deploy_key`.
 
 == Limitations
 
@@ -22,7 +22,7 @@ You need to have a https://docs.github.com/en/authentication/keeping-your-accoun
 
 Add a `uses: teragrep/dfg_01@main` https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idstepsuses[step] to your workflow.
 
-Examples uses a secret called `PAT_TOKEN` that contains the token. **DO NOT** hardcode the token at any point.
+Examples uses a secret called `DEPLOY_KEY` that contains the key. **DO NOT** hardcode the key at any point.
 
 .Minimum configuration with only required arguments
 [source,yaml]
@@ -33,7 +33,7 @@ Examples uses a secret called `PAT_TOKEN` that contains the token. **DO NOT** ha
     from_repository: teragrep/example-repository
     from_version: 1.0.0
     to_repository: teragrep/central-repository
-    token: ${{ secrets.PAT_TOKEN }}
+    deploy_key: ${{ secrets.DEPLOY_KEY }}
     files: target/wanted-rpm-*.rpm
 ----
 
@@ -46,7 +46,7 @@ Examples uses a secret called `PAT_TOKEN` that contains the token. **DO NOT** ha
     from_repository: teragrep/example-repository
     from_version: 1.0.0
     to_repository: teragrep/central-repository
-    token: ${{ secrets.PAT_TOKEN }}
+    deploy_key: ${{ secrets.DEPLOY_KEY }}
     files: target/wanted-rpm-*.rpm
     to_branch: arbitrary-git-branch
     to_path: arbitrary-base-path
@@ -72,9 +72,9 @@ These are required arguments to be used in `with:` block.
 |The target GitHub repository where the repodata is deployed to. In `user/repository` format.
 |`teragrep/dnf-repo`
 
-|`token`
-|The Personal Access Token to be used with pushing to the target repository.
-|`github_pat_SOMEEXAMPLEKEY`
+|`deploy_key`
+|The private part of the deployment key to be used with pushing to the target repository.
+|`${{ secrets.DEPLOY_KEY }}`
 
 |`files`
 |The files that are used for making the repodata. Supports glob.
