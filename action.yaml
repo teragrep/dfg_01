@@ -31,7 +31,7 @@ runs:
   steps:
     - name: Add component to main repository
       run: |
-        export DFG_01_TMPDIR="$(mktmp --directory --tmpdir=${{ runner.temp }})";
+        export DFG_01_TMPDIR="$(mktemp --directory --tmpdir=${{ runner.temp }})";
         mkdir --parents "${DFG_01_TMPDIR}/rpm/${{ inputs.from_version }}" "${DFG_01_TMPDIR}/component-repo" "${DFG_01_TMPDIR}/merged-repo";
         for file in ${{ inputs.files }}; do ln --verbose --symbolic "${file}" "${DFG_01_TMPDIR}/rpm/${{ inputs.from_version }}/$(basename ${file})"; done;
         sudo apt-get update;
