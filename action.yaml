@@ -41,6 +41,7 @@ runs:
         git config --global user.name "${{ github.actor }}";
         echo "${GH_SSH_KEY}" > "${DFG_01_TMPDIR}/ssh.key";
         export GIT_SSH_COMMAND="ssh -i ${DFG_01_TMPDIR}/ssh.key";
+        chmod 400 "${DFG_01_TMPDIR}/ssh.key";
         export attempt=0;
         while true; do
           export attempt="$((attempt+1))";
