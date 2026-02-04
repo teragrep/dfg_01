@@ -54,7 +54,6 @@ runs:
           bash -c '
             set -e;
             git clone --branch "${{ inputs.to_branch }}" -- "git@github.com:${{ inputs.to_repository }}.git" upstream;
-            if [ ! -d "upstream/${{ inputs.to_path }}/releases" ]; then mkdir --parents "upstream/${{ inputs.to_path }}/releases"; createrepo_c --verbose "upstream/${{ inputs.to_path }}/releases"; fi;
             mergerepo_c --verbose --simple-md-filenames --all --no-database --repo="upstream/${{ inputs.to_path }}/releases" --repo="${DFG_01_TMPDIR}/component-repo" --outputdir "${DFG_01_TMPDIR}/merged-repo";
             rm --recursive --force "upstream/${{ inputs.to_path }}/releases/repodata/";
             mv --verbose "${DFG_01_TMPDIR}/merged-repo/repodata/" "upstream/${{ inputs.to_path }}/releases/repodata";
