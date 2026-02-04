@@ -26,6 +26,9 @@ inputs:
   deploy_key:
     required: true
     type: string
+  gpg_public_key:
+    required: true
+    type: string
 runs:
   using: composite
   steps:
@@ -51,10 +54,12 @@ runs:
           bash -c '
             set -e;
             git clone --branch "${{ inputs.to_branch }}" -- "git@github.com:${{ inputs.to_repository }}.git" upstream;
+            if [ ! -d "upstream/${{ inputs.to_path }}/releases" ]; then mkdir --parents "upstream/${{ inputs.to_path }}/releases"; createrepo_c --verbose "upstream/${{ inputs.to_path }}/releases"; fi;
             mergerepo_c --verbose --simple-md-filenames --all --no-database --repo="upstream/${{ inputs.to_path }}/releases" --repo="${DFG_01_TMPDIR}/component-repo" --outputdir "${DFG_01_TMPDIR}/merged-repo";
             rm --recursive --force "upstream/${{ inputs.to_path }}/releases/repodata/";
             mv --verbose "${DFG_01_TMPDIR}/merged-repo/repodata/" "upstream/${{ inputs.to_path }}/releases/repodata";
-            echo -e "[teragrep-central-releases]\nname=teragrep-central-releases\nbaseurl=https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}/releases\ngpgcheck=0\nenabled=1" > "upstream/${{ inputs.to_path }}/releases/teragrep-central-releases.repo";
+            echo -e "[teragrep-central-releases]\nname=teragrep-central-releases\nbaseurl=https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}/releases\ngpgcheck=1\ngpgkey=https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}/releases/teragrep-central-releases-gpg-key.pub\nenabled=1" > "upstream/${{ inputs.to_path }}/releases/teragrep-central-releases.repo";
+            echo "${{ inputs.gpg_public_key }}" > "upstream/${{ inputs.to_path }}/releases/teragrep-central-releases-gpg-key.pub";
             cd "upstream/${{ inputs.to_path }}";
             git add .;
             git commit --message "Adds ${{ inputs.from_repository }} version ${{ inputs.from_version }}";

@@ -35,6 +35,7 @@ Examples uses a secret called `DEPLOY_KEY` that contains the key. **DO NOT** har
     to_repository: teragrep/central-repository
     deploy_key: ${{ secrets.DEPLOY_KEY }}
     files: target/wanted-rpm-*.rpm
+    gpg_public_key: "${{ secrets.RPM_SIGNING_PUBLIC_KEY }}"
 ----
 
 .Full configuration with optional arguments
@@ -48,6 +49,7 @@ Examples uses a secret called `DEPLOY_KEY` that contains the key. **DO NOT** har
     to_repository: teragrep/central-repository
     deploy_key: ${{ secrets.DEPLOY_KEY }}
     files: target/wanted-rpm-*.rpm
+    gpg_public_key: ${{ secrets.RPM_SIGNING_PUBLIC_KEY }}
     to_branch: arbitrary-git-branch
     to_path: arbitrary-base-path
     max_attempts: 1
@@ -79,6 +81,10 @@ These are required arguments to be used in `with:` block.
 |`files`
 |The files that are used for making the repodata. Supports glob.
 |`target/wanted-rpm-*.rpm`
+
+|`gpg_public_key`
+|The public part of the GPG key the `.rpm` was signed with.
+|`${{ secrets.RPM_SIGNING_PUBLIC_KEY }}`
 |===
 
 These are optional arguments to be used in `with:` block.
