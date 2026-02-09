@@ -106,7 +106,7 @@ These are optional arguments to be used in `with:` block.
 |`5`
 
 |`repo_baseurl`
-|The baseurl used in the `.repo` file.
+|The baseurl used in the `.repo` file. Note that it is evaluted to the default value if left empty, and that it can't contain variables if explicitly set.
 |`https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}`
 
 |`repo_name`
