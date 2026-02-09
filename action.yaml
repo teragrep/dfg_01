@@ -30,7 +30,6 @@ inputs:
     required: true
     type: string
   repo_baseurl:
-    default: 'https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}'
     type: string
   repo_name:
     default: 'teragrep-central-releases'
@@ -40,6 +39,13 @@ runs:
   steps:
     - name: Add component to main repository
       run: |
+        if [ "${{ inputs.repo_baseurl }}" == "" ]; then
+          export REPO_BASEURL="https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}";
+          echo "Custom baseurl was not set, using '${REPO_BASEURL}'";
+        else
+          export REPO_BASEURL="${{ inputs.repo_baseurl }}";
+          echo "Detected baseurl, set to '${REPO_BASEURL}'";
+        fi;
         export DFG_01_TMPDIR="$(mktemp --directory --tmpdir=${{ runner.temp }})";
         mkdir --parents "${DFG_01_TMPDIR}/rpm/${{ inputs.from_version }}" "${DFG_01_TMPDIR}/component-repo" "${DFG_01_TMPDIR}/merged-repo";
         for file in ${{ inputs.files }}; do ln --verbose "${{ github.workspace }}/${file}" "${DFG_01_TMPDIR}/rpm/${{ inputs.from_version }}/$(basename ${file})"; done;
@@ -63,7 +69,7 @@ runs:
             mergerepo_c --verbose --simple-md-filenames --all --no-database --repo="upstream/${{ inputs.to_path }}/releases" --repo="${DFG_01_TMPDIR}/component-repo" --outputdir "${DFG_01_TMPDIR}/merged-repo";
             rm --recursive --force "upstream/${{ inputs.to_path }}/releases/repodata/";
             mv --verbose "${DFG_01_TMPDIR}/merged-repo/repodata/" "upstream/${{ inputs.to_path }}/releases/repodata";
-            echo -e "[${{ inputs.repo_name }}]\nname=${{ inputs.repo_name }}\nbaseurl=${{ inputs.repo_baseurl }}/releases\ngpgcheck=1\ngpgkey=${{ inputs.repo_baseurl }}/releases/${{ inputs.repo_name }}-gpg-key.pub\nenabled=1" > "upstream/${{ inputs.to_path }}/releases/${{ inputs.repo_name }}.repo";
+            echo -e "[${{ inputs.repo_name }}]\nname=${{ inputs.repo_name }}\nbaseurl=${REPO_BASEURL}/releases\ngpgcheck=1\ngpgkey=${REPO_BASEURL}/releases/${{ inputs.repo_name }}-gpg-key.pub\nenabled=1" > "upstream/${{ inputs.to_path }}/releases/${{ inputs.repo_name }}.repo";
             echo "${{ inputs.gpg_public_key }}" > "upstream/${{ inputs.to_path }}/releases/${{ inputs.repo_name }}-gpg-key.pub";
             cd "upstream/${{ inputs.to_path }}";
             git add .;
