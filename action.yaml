@@ -63,7 +63,7 @@ runs:
             mergerepo_c --verbose --simple-md-filenames --all --no-database --repo="upstream/${{ inputs.to_path }}/releases" --repo="${DFG_01_TMPDIR}/component-repo" --outputdir "${DFG_01_TMPDIR}/merged-repo";
             rm --recursive --force "upstream/${{ inputs.to_path }}/releases/repodata/";
             mv --verbose "${DFG_01_TMPDIR}/merged-repo/repodata/" "upstream/${{ inputs.to_path }}/releases/repodata";
-            echo -e "[${{ inputs.repo_name }}]\nname=${{ inputs.repo_name }}\nbaseurl=${{ inputs.repo_baseurl }}/releases\ngpgcheck=1\ngpgkey=${{ inputsrepo_baseurl }}/releases/${{ inputs.repo_name }}-gpg-key.pub\nenabled=1" > "upstream/${{ inputs.to_path }}/releases/${{ inputs.repo_name }}-releases.repo";
+            echo -e "[${{ inputs.repo_name }}]\nname=${{ inputs.repo_name }}\nbaseurl=${{ inputs.repo_baseurl }}/releases\ngpgcheck=1\ngpgkey=${{ inputs.repo_baseurl }}/releases/${{ inputs.repo_name }}-gpg-key.pub\nenabled=1" > "upstream/${{ inputs.to_path }}/releases/${{ inputs.repo_name }}-releases.repo";
             echo "${{ inputs.gpg_public_key }}" > "upstream/${{ inputs.to_path }}/releases/${{ inputs.repo_name }}-gpg-key.pub";
             cd "upstream/${{ inputs.to_path }}";
             git add .;
