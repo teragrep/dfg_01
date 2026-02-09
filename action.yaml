@@ -66,7 +66,7 @@ runs:
           bash -c '
             set -e;
             git clone --branch "${{ inputs.to_branch }}" -- "git@github.com:${{ inputs.to_repository }}.git" upstream;
-            mergerepo_c --verbose --simple-md-filenames --all --no-database --repo="upstream/${{ inputs.to_path }}/releases" --repo="${DFG_01_TMPDIR}/component-repo" --outputdir "${DFG_01_TMPDIR}/merged-repo";
+            mergerepo_c --verbose --omit-baseurl --simple-md-filenames --all --no-database --repo="upstream/${{ inputs.to_path }}/releases" --repo="${DFG_01_TMPDIR}/component-repo" --outputdir "${DFG_01_TMPDIR}/merged-repo";
             rm --recursive --force "upstream/${{ inputs.to_path }}/releases/repodata/";
             mv --verbose "${DFG_01_TMPDIR}/merged-repo/repodata/" "upstream/${{ inputs.to_path }}/releases/repodata";
             echo -e "[${{ inputs.repo_name }}]\nname=${{ inputs.repo_name }}\nbaseurl=${REPO_BASEURL}/releases\ngpgcheck=1\ngpgkey=${REPO_BASEURL}/releases/${{ inputs.repo_name }}-gpg-key.pub\nenabled=1" > "upstream/${{ inputs.to_path }}/releases/${{ inputs.repo_name }}.repo";
