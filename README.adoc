@@ -53,6 +53,8 @@ Examples uses a secret called `DEPLOY_KEY` that contains the key. **DO NOT** har
     to_branch: arbitrary-git-branch
     to_path: arbitrary-base-path
     max_attempts: 1
+    repo_baseurl: https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}
+    repo_name: teragrep-central-releases
 ----
 
 == Documentation
@@ -102,6 +104,14 @@ These are optional arguments to be used in `with:` block.
 |`max_attempts`
 |How times should committing should be attempted.
 |`5`
+
+|`repo_baseurl`
+|The `baseurl=` used in the `.repo` file. Supports `inputs` variables.
+|`https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}`
+
+|`repo_name`
+|Sets the repository name.
+|`teragrep-central-releases`
 |===
 
 == Contributing
