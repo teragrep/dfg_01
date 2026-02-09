@@ -29,6 +29,12 @@ inputs:
   gpg_public_key:
     required: true
     type: string
+  repo_baseurl:
+    default: 'https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}/releases'
+    type: string
+  repo_name:
+    default: 'teragrep-central-releases'
+    type: string
 runs:
   using: composite
   steps:
@@ -57,7 +63,7 @@ runs:
             mergerepo_c --verbose --simple-md-filenames --all --no-database --repo="upstream/${{ inputs.to_path }}/releases" --repo="${DFG_01_TMPDIR}/component-repo" --outputdir "${DFG_01_TMPDIR}/merged-repo";
             rm --recursive --force "upstream/${{ inputs.to_path }}/releases/repodata/";
             mv --verbose "${DFG_01_TMPDIR}/merged-repo/repodata/" "upstream/${{ inputs.to_path }}/releases/repodata";
-            echo -e "[teragrep-central-releases]\nname=teragrep-central-releases\nbaseurl=https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}/releases\ngpgcheck=1\ngpgkey=https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}/releases/teragrep-central-releases-gpg-key.pub\nenabled=1" > "upstream/${{ inputs.to_path }}/releases/teragrep-central-releases.repo";
+            echo -e "[${{ inputs.repo_name }}]\nname=${{ inputs.repo_name }}\nbaseurl=${{ inputs.repo_baseurl }}\ngpgcheck=1\ngpgkey=${{ inputs.base_url }}/${{ inputs.repo_name }}-gpg-key.pub\nenabled=1" > "upstream/${{ inputs.to_path }}/releases/teragrep-central-releases.repo";
             echo "${{ inputs.gpg_public_key }}" > "upstream/${{ inputs.to_path }}/releases/teragrep-central-releases-gpg-key.pub";
             cd "upstream/${{ inputs.to_path }}";
             git add .;
