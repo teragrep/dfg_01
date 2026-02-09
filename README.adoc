@@ -53,7 +53,7 @@ Examples uses a secret called `DEPLOY_KEY` that contains the key. **DO NOT** har
     to_branch: arbitrary-git-branch
     to_path: arbitrary-base-path
     max_attempts: 1
-    repo_baseurl: https://custom.repo.example.com/
+    repo_baseurl: https://custom.repo.example.com/example-repo
     repo_name: custom-repo-example
 ----
 
