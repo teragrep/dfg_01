@@ -43,7 +43,7 @@ runs:
           export REPO_BASEURL="https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}";
           echo "Custom baseurl was not set, using '${REPO_BASEURL}'";
         else
-          export REPO_BASEURL="${{ inputs.repo_baseurl }}";
+          export REPO_BASEURL="${{ inputs.repo_baseurl }}/${{ inputs.to_path }}";
           echo "Detected baseurl, set to '${REPO_BASEURL}'";
         fi;
         export DFG_01_TMPDIR="$(mktemp --directory --tmpdir=${{ runner.temp }})";
