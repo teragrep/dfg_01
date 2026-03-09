@@ -30,40 +30,21 @@ inputs:
     required: true
     type: string
   repo_baseurl:
-    type: string
-  repo_baseurl_append_path:
-    default: false
+    default: 'https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}'
     type: string
   repo_name:
     default: 'teragrep-central-releases'
     type: string
   location_prefix:
+    default: 'https://github.com/${{ inputs.from_repository }}/releases/download/${{ inputs.from_version }}/'
     type: string
 runs:
   using: composite
   steps:
     - name: Add component to main repository
       run: |
-        if [ "${{ inputs.repo_baseurl }}" == "" ]; then
-          export REPO_BASEURL="https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}";
-          echo "Custom baseurl was not set, using '${REPO_BASEURL}'";
-        else
-          export REPO_BASEURL="${{ inputs.repo_baseurl }}";
-          if [ "${{ inputs.repo_baseurl_append_path }}" == "true" ]; then
-            echo "Appending '${{ inputs.to_path }}' to baseurl";
-            export REPO_BASEURL="${REPO_BASEURL}/${{ inputs.to_path }}";
-          fi;
-          echo "Detected custom baseurl, set to '${REPO_BASEURL}'";
-        fi;
-
-        if [ "${{ inputs.location_prefix }}" == "" ]; then
-          export LOCATION_PREFIX="https://github.com/${{ inputs.from_repository }}/releases/download/${{ inputs.from_version }}/";
-          echo "Location prefix was not set, using default '${LOCATION_PREFIX}'";
-        else
-          export LOCATION_PREFIX="${{ inputs.location_prefix }}";
-          echo "Detected location prefix, set to '${LOCATION_PREFIX}'";
-        fi;
-
+        echo "Using '${REPO_BASEURL}' as baseurl";
+        echo "Using '${LOCATION_PREFIX}' as location prefix";
         export DFG_01_TMPDIR="$(mktemp --directory --tmpdir=${{ runner.temp }})";
         mkdir --parents "${DFG_01_TMPDIR}/packages" "${DFG_01_TMPDIR}/component-repo" "${DFG_01_TMPDIR}/merged-repo";
         for file in ${{ inputs.files }}; do ln --verbose "${{ github.workspace }}/${file}" "${DFG_01_TMPDIR}/packages/$(basename ${file})"; done;
@@ -110,3 +91,5 @@ runs:
       shell: bash
       env:
         GH_SSH_KEY: "${{ inputs.deploy_key }}"
+        REPO_BASEURL: "${{ inputs.repo_baseurl }}"
+        LOCATION_PREFIX: "${{ inputs.location_preix }}"
