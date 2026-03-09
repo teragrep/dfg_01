@@ -55,6 +55,7 @@ Examples uses a secret called `DEPLOY_KEY` that contains the key. **DO NOT** har
     max_attempts: 1
     repo_baseurl: https://custom.repo.example.com/example-repo
     repo_name: custom-repo-example
+    location_prefix: 'packages/'
 ----
 
 == Documentation
@@ -99,19 +100,23 @@ These are optional arguments to be used in `with:` block.
 
 |`to_path`
 |The path where repository files are commited to. No trailing slash required.
-|`central`
+|`central/releases`
 
 |`max_attempts`
 |How times should committing should be attempted.
 |`5`
 
 |`repo_baseurl`
-|The baseurl used in the `.repo` file. Note that it is evaluated to the default value if left empty, and that it can't contain variables if explicitly set. The value of `to_path` is appended to it.
+|The baseurl used in the `.repo` file. Note that it is evaluated to the default value if left empty, and that it can't contain variables if explicitly set. No trailing slash required.
 |`https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}`
 
 |`repo_name`
 |Sets the repository name.
 |`teragrep-central-releases`
+
+|`location_prefix`
+|Expert setting. Sets the location prefix. Note that it is evaluated to the default value if left empty, and that it can't contain variables if explicitly set. Mostly useful only when using a repository manager that requires relative paths and an url rewriting proxy which redirects requests to the correct location.
+|`https://github.com/${{ inputs.from_repository }}/releases/download/${{ inputs.from_version }}/`
 |===
 
 == Contributing

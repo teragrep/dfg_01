@@ -18,7 +18,7 @@ inputs:
     default: 'gh-pages'
     type: string
   to_path:
-    default: 'central'
+    default: 'central/releases'
     type: string
   max_attempts:
     default: 5
@@ -34,6 +34,8 @@ inputs:
   repo_name:
     default: 'teragrep-central-releases'
     type: string
+  location_prefix:
+    type: string
 runs:
   using: composite
   steps:
@@ -43,15 +45,24 @@ runs:
           export REPO_BASEURL="https://raw.githubusercontent.com/${{ inputs.to_repository }}/refs/heads/${{ inputs.to_branch }}/${{ inputs.to_path }}";
           echo "Custom baseurl was not set, using '${REPO_BASEURL}'";
         else
-          export REPO_BASEURL="${{ inputs.repo_baseurl }}/${{ inputs.to_path }}";
-          echo "Detected baseurl, set to '${REPO_BASEURL}'";
+          export REPO_BASEURL="${{ inputs.repo_baseurl }}";
+          echo "Detected custom baseurl, set to '${REPO_BASEURL}'";
         fi;
+
+        if [ "${{ inputs.location_prefix }}" == "" ]; then
+          export LOCATION_PREFIX="https://github.com/${{ inputs.from_repository }}/releases/download/${{ inputs.from_version }}/";
+          echo "Location prefix was not set, using default '${LOCATION_PREFIX}'";
+        else
+          export LOCATION_PREFIX="${{ inputs.location_prefix }}";
+          echo "Detected location prefix, set to '${LOCATION_PREFIX}'";
+        fi;
+
         export DFG_01_TMPDIR="$(mktemp --directory --tmpdir=${{ runner.temp }})";
-        mkdir --parents "${DFG_01_TMPDIR}/rpm/${{ inputs.from_version }}" "${DFG_01_TMPDIR}/component-repo" "${DFG_01_TMPDIR}/merged-repo";
-        for file in ${{ inputs.files }}; do ln --verbose "${{ github.workspace }}/${file}" "${DFG_01_TMPDIR}/rpm/${{ inputs.from_version }}/$(basename ${file})"; done;
+        mkdir --parents "${DFG_01_TMPDIR}/packages" "${DFG_01_TMPDIR}/component-repo" "${DFG_01_TMPDIR}/merged-repo";
+        for file in ${{ inputs.files }}; do ln --verbose "${{ github.workspace }}/${file}" "${DFG_01_TMPDIR}/packages/$(basename ${file})"; done;
         sudo apt-get update;
         sudo apt-get --yes install createrepo-c;
-        createrepo_c --verbose --no-database --location-prefix="https://github.com/${{ inputs.from_repository }}/releases/download/" --outputdir="${DFG_01_TMPDIR}/component-repo" "${DFG_01_TMPDIR}/rpm";
+        createrepo_c --verbose --no-database --location-prefix="${LOCATION_PREFIX}" --outputdir="${DFG_01_TMPDIR}/component-repo" "${DFG_01_TMPDIR}/packages";
         git config --global user.email "${{ github.actor }}@users.noreply.github.com";
         git config --global user.name "${{ github.actor }}";
         echo "${GH_SSH_KEY}" > "${DFG_01_TMPDIR}/ssh.key";
@@ -66,16 +77,16 @@ runs:
           bash -c '
             set -e;
             git clone --branch "${{ inputs.to_branch }}" -- "git@github.com:${{ inputs.to_repository }}.git" upstream;
-            if [ ! -d "upstream/${{ inputs.to_path }}/releases" ]; then
+            if [ ! -d "upstream/${{ inputs.to_path }}" ]; then
               echo "Upstream repository not found, creating a new one from scratch";
-              mkdir --parents "upstream/${{ inputs.to_path }}/releases";
-              createrepo_c --verbose --no-database --simple-md-filenames --compress-type=gz --general-compress-type=gz --outputdir="upstream/${{ inputs.to_path }}/releases" "upstream/${{ inputs.to_path }}/releases";
+              mkdir --parents "upstream/${{ inputs.to_path }}";
+              createrepo_c --verbose --no-database --simple-md-filenames --compress-type=gz --general-compress-type=gz --outputdir="upstream/${{ inputs.to_path }}" "upstream/${{ inputs.to_path }}";
             fi;
-            mergerepo_c --verbose --omit-baseurl --simple-md-filenames --all --no-database --repo="upstream/${{ inputs.to_path }}/releases" --repo="${DFG_01_TMPDIR}/component-repo" --outputdir "${DFG_01_TMPDIR}/merged-repo";
-            rm --recursive --force "upstream/${{ inputs.to_path }}/releases/repodata/";
-            mv --verbose "${DFG_01_TMPDIR}/merged-repo/repodata/" "upstream/${{ inputs.to_path }}/releases/repodata";
-            echo -e "[${{ inputs.repo_name }}]\nname=${{ inputs.repo_name }}\nbaseurl=${REPO_BASEURL}/releases\ngpgcheck=1\ngpgkey=${REPO_BASEURL}/releases/${{ inputs.repo_name }}-gpg-key.pub\nenabled=1" > "upstream/${{ inputs.to_path }}/releases/${{ inputs.repo_name }}.repo";
-            echo "${{ inputs.gpg_public_key }}" > "upstream/${{ inputs.to_path }}/releases/${{ inputs.repo_name }}-gpg-key.pub";
+            mergerepo_c --verbose --omit-baseurl --simple-md-filenames --all --no-database --repo="upstream/${{ inputs.to_path }}" --repo="${DFG_01_TMPDIR}/component-repo" --outputdir "${DFG_01_TMPDIR}/merged-repo";
+            rm --recursive --force "upstream/${{ inputs.to_path }}/repodata/";
+            mv --verbose "${DFG_01_TMPDIR}/merged-repo/repodata/" "upstream/${{ inputs.to_path }}/repodata";
+            echo -e "[${{ inputs.repo_name }}]\nname=${{ inputs.repo_name }}\nbaseurl=${REPO_BASEURL}\ngpgcheck=1\ngpgkey=${REPO_BASEURL}/${{ inputs.repo_name }}-gpg-key.pub\nenabled=1" > "upstream/${{ inputs.to_path }}/${{ inputs.repo_name }}.repo";
+            echo "${{ inputs.gpg_public_key }}" > "upstream/${{ inputs.to_path }}/${{ inputs.repo_name }}-gpg-key.pub";
             cd "upstream/${{ inputs.to_path }}";
             git add .;
             git commit --message "Adds ${{ inputs.from_repository }} version ${{ inputs.from_version }}";
